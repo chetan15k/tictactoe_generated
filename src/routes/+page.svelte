@@ -1,55 +1,18 @@
 <script lang="ts">
-	type Player = 'X' | 'O' | null;
-	type Board = Player[];
+	import { createInitialGameState, makeMove as makeGameMove, resetGame as resetGameState, type GameState } from '$lib/game-logic';
 
-	let board: Board = Array(9).fill(null);
-	let currentPlayer: 'X' | 'O' = 'X';
-	let winner: Player = null;
-	let gameOver = false;
-	let isDraw = false;
-
-	// Winning combinations
-	const winningCombinations = [
-		[0, 1, 2],
-		[3, 4, 5],
-		[6, 7, 8], // rows
-		[0, 3, 6],
-		[1, 4, 7],
-		[2, 5, 8], // columns
-		[0, 4, 8],
-		[2, 4, 6] // diagonals
-	];
+	let gameState: GameState = createInitialGameState();
 
 	function makeMove(index: number) {
-		if (board[index] || gameOver) return;
-
-		board[index] = currentPlayer;
-		board = [...board]; // trigger reactivity
-
-		if (checkWinner()) {
-			winner = currentPlayer;
-			gameOver = true;
-		} else if (board.every((cell) => cell !== null)) {
-			isDraw = true;
-			gameOver = true;
-		} else {
-			currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-		}
-	}
-
-	function checkWinner(): boolean {
-		return winningCombinations.some((combination) =>
-			combination.every((index) => board[index] === currentPlayer)
-		);
+		gameState = makeGameMove(gameState, index);
 	}
 
 	function resetGame() {
-		board = Array(9).fill(null);
-		currentPlayer = 'X';
-		winner = null;
-		gameOver = false;
-		isDraw = false;
+		gameState = resetGameState();
 	}
+
+	// Reactive declarations for easier template access
+	$: ({ board, currentPlayer, winner, gameOver, isDraw } = gameState);
 </script>
 
 <main>
